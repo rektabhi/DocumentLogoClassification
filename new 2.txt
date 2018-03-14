@@ -1,0 +1,161 @@
+model = fitcsvm(X,y);
+for i=1:23
+(predict(model,X(i,:)))
+end
+
+
+
+
+
+
+
+
+
+ X = CreateX2(50);
+>> [result model]=CheckPrediction(X(1:28,:),y(1:28));
+>> for i=33:51
+res(i) = predict(model,X(i,:));
+end
+
+
+
+
+%PLOT
+
+for i=16:18
+	figure;hold on
+	plot([1:11],X(1:11,i),'.b')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+	plot([12:18],X(12:18,i),'*g')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+	plot([19:25],X(19:25,i),'or')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+	plot([26:32],X(26:32,i),'+m')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+	plot([33:40],X(33:40,i),'hk')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+	plot([41:50],X(41:50,i),'*y')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+	plot([51:58],X(51:58,i),'pk')
+	xlabel("Logo");
+	ylabel(strcat("Feature ",num2str(i)));
+end
+
+
+
+
+
+
+
+
+a = ReadLabels();
+y = ones(60,1);
+y(12:18)=2;
+y(19:25)=3;
+y(26:32)=4;
+y(33:40)=5;
+y(41:50)=6;
+y(51:58)=7;
+y(59:61)=2;
+y(62:66)=3;
+y(67:69)=4;
+y(70:76)=1;
+y(78:92)=5;
+y(93:97)=6;
+y(98:102)=7;
+y(77)=3;
+
+[X SURF temp] = CreateX2(202);
+[result model]=CheckPrediction(X(1:58,:),y(1:58));
+for i=59:102
+	res(i) = predict(model,X(i,:));
+	ansi = strcat(a{y(i),2}," ",a{res(i),2});
+	%Match SURF Features:
+	matchedImages = find(y==res(i));
+	m = size(matchedImages);
+	count=0;
+	for j=1:m
+		matchedFeatures = matchFeatures(temp{matchedImages(j)},temp{i});
+		count = count + size(matchedFeatures,1);
+	end
+	%disp(a{res(i),2});
+	if count<10 || res(i)~=y(i)
+		disp(strcat(string(i)," ",ansi," ",string(count)));
+		%disp(ansi);
+		%disp(count);
+	end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+a = ReadLabels();
+y = ones(60,1);
+y(12:18)=2;
+y(19:25)=3;
+y(26:32)=4;
+y(33:40)=5;
+y(41:50)=6;
+y(51:58)=7;
+y(75:77)=2;
+y(78:82)=3;
+y(83:85)=4;
+y(86:92)=1;
+y(94:108)=5;
+y(109:113)=6;
+y(114:118)=7;
+y(93)=3;
+y(59:63)=8;
+y(64:68)=9;
+y(69:74)=10;
+y(119:120)=9;
+y(121:124)=10;
+y(124:127)=8;
+
+
+
+[X SURF temp] = CreateX2(227);
+[result model]=CheckPrediction(X(1:74,:),y(1:74));
+for i=75:127
+	res(i) = predict(model,X(i,:));
+	%Match SURF Features:
+	matchedImages = find(y==res(i));
+	m = size(matchedImages);
+	count=0;
+	for j=1:m
+		matchedFeatures = matchFeatures(temp{matchedImages(j)},temp{i});
+		count = count + size(matchedFeatures,1);
+	end
+	%disp(a{res(i),2});
+	if count==0
+		c2=0;
+		for j=1:74
+			c2(y(j)) = c2(y(j)) + size(matchFeatures(temp{matchedImages(j)},temp{i}),1);
+		end
+		[count res(i)] = max(c2);
+	end
+	ansi = strcat(a{y(i),2}," ",a{res(i),2});
+	if count<10 || res(i)~=y(i)
+		disp(strcat(string(i)," ",ansi," ",string(count)));
+		%disp(ansi);
+		%disp(count);
+	end
+end
