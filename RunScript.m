@@ -33,8 +33,12 @@ for i=1:noOfClasses
 	noOfLogosPerClass(i) = sum(y==i);
 end
 %Feature vectors are not combined to minimize the error caused by learning algorithm.
+countSVM = 0;
 for i=75:127
 	[res(i) score cost] = predict(model,X(i,:));
+	if res(i) ~= y(i)
+		countSVM = countSVM+1;
+	end
 	%Match SURF Features:
 	%matchedImages = find(y==res(i));
 	%m = size(matchedImages);
@@ -88,6 +92,6 @@ for i=75:127
 	end
 	
 end
-
-figure, plot(graphOfHOGProbability);
-figure, plot(graphOfSURF);
+countSVM
+%figure, plot(graphOfHOGProbability);
+%figure, plot(graphOfSURF);
