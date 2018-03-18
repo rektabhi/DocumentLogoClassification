@@ -1,7 +1,7 @@
 function a = ReadLabels()
 %Maps indices to names of institutions
 %Default path of the CSV file to be read
-path = 'Test/Labels.csv';
+path = 'Train/Labels.csv';
 f = fopen(path);
 i=1;
 %Returns a cell array -> {Index, Name}
