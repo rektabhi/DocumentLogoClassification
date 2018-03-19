@@ -1,8 +1,10 @@
 %Script to run directly
+
 %Reads the labels from the csv file
 a = ReadLabels();
-%Creates the y array of the target variables
-%y = ones(60,1);
+
+%Creates the y and y2 arrays of the target variables
+
 %Training Data
 y(1:11)=1;
 y(12:18)=2;
@@ -54,18 +56,32 @@ XTest = X(noOfTrainingLogos+1:totalNo,:);
 SURFTest = SURF(noOfTrainingLogos+1:totalNo);
 processedLogoTest = processedLogo(noOfTrainingLogos+1:totalNo);
 
-
+%Training model for HOG features
 [result model]=CheckPrediction(XTrain(1:noOfTrainingLogos,:),y(1:noOfTrainingLogos));
+
+	% for i=1:noOfTrainingLogos
+		% [res2(i) score2(i,:) cost2] = predict(model,XTrain(i,:));
+		% if res2(i)~=y(i)
+			% match(i) = 0;
+		% else
+			% match(i) = 1;
+		% end
+	% end
+	% model2 = fitcsvm(score2(1:noOfTrainingLogos,:),match(1:noOfTrainingLogos));
+
+
 disp("Index    Actual    Predicted    SURFPrediction   SURF   HOGPrediction   HOG ");
+
 for i=1:noOfClasses
 	noOfLogosPerClass(i) = sum(y==i);
 end
+
 %Feature vectors are not combined to minimize the error caused by learning algorithm.
 countSVM = 0;
 countSURF=0;
 for i=1:noOfTestLogos
 	%res stores the prediction made using hog features
-	[res(i) score cost] = predict(model,XTest(i,:));
+	[res(i) score(i,:) cost] = predict(model,XTest(i,:));
 	if res(i) ~= y2(i)
 		countSVM = countSVM+1;
 	end
@@ -79,30 +95,15 @@ for i=1:noOfTestLogos
 		matchedFeatures = matchFeatures(SURFTrain{j},SURFTest{i});
 		cnt(y(j)) = cnt(y(j)) + size(matchedFeatures,1);
 	end
-	%disp(a{res(i),2});
-	% if cnt<10
-		% c2=zeros(size(a,1),1);
-		% for j=1:74
-			% c2(y(j)) = c2(y(j)) + size(matchFeatures(temp{j},temp{i}),1);
-		% end
-		
-		% c2=c2./noOfLogosPerClass';
-		% [cnt res(i)] = max(c2);
-	% end
-	%disp(cnt);
-	%sum(score)
 	cnt = cnt./noOfLogosPerClass';
-	%disp(cnt);
-	%disp(score);
 	[maxMatch maxMatchIndex] = max(cnt);
-	prediction(i) = res(i);
+	prediction(i) = maxMatchIndex;
 	if maxMatchIndex~= res(i)
 		%disp(strcat(string(i)," ",string(res(i))," ",string(maxMatchIndex)," ",string(y(i))));
-		if maxMatch>1 && abs(score(res(i)))>0.025
+		if maxMatch>1
 			%SURF is better
 			prediction(i) = maxMatchIndex;
-		%else if maxMatch<1 && abs(score(res(i)))<0.04
-		else
+		elseif abs(score(i,res(i)))<0.025
 			%HOG is better
 			prediction(i) = res(i);
 		end
@@ -110,22 +111,13 @@ for i=1:noOfTestLogos
 	if maxMatchIndex~=y2(i)
 		countSURF = countSURF+1;
 	end
-	graphOfHOGProbability(i) = score(res(i));
+	graphOfHOGProbability(i) = score(i,res(i));
 	graphOfSURF(i) = maxMatch;
-	
-	% if abs(score(res(i)))>0.04
-		% res(i) = maxMatchIndex;
-	% end
-	%ansi = strcat(a{y2(i),2}," ",a{prediction(i),2});
-	%if y(i)~=maxMatchIndex || res(i)~=y(i) || maxMatch<1
-	
+
 	
 	%prediction(i) = maxMatchIndex;
 	if prediction(i)~=y2(i)
-		%disp(c2');
-		disp(strcat(string(i)," ",a{y2(i),2}," ",a{prediction(i),2}," ",a{(maxMatchIndex),2}," ",string(maxMatch)," ",a{res(i),2}," ",string(score(res(i)))," "));
-		%disp(ansi);
-		%disp(cnt);
+		disp(strcat(string(i)," ",a{y2(i),2}," ",a{prediction(i),2}," ",a{(maxMatchIndex),2}," ",string(maxMatch)," ",a{res(i),2}," ",string(score(i,res(i)))," "));
 	end
 	
 end
